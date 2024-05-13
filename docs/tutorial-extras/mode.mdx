@@ -1,0 +1,113 @@
+---
+sidebar_position: 7
+---
+
+# 字段可编辑控制
+
+我们经常遇到的场景是：
+- 在编辑或者拷贝页面，我们会基于业务逻辑控制，来决定是否允许某些字段可编辑。
+
+很多时候，这个给我们带来了不小的麻烦，在 `EasyPage` 中，我们把这种场景标准化了，如下：
+
+```tsx
+import { DEFAULT_COMPONENTS, EasyPage } from '@easy-page/antd-ui';
+import React from 'react';
+import '../common/style';
+import '@easy-page/antd-ui/style.css';
+import { pageInfo } from './pageInfo';
+
+const Topic25 = () => {
+  return (
+    <EasyPage<{ name: string; age: string }>
+      {...pageInfo}
+      context={{
+        editable: {
+          canEditKeys: ['age'],
+        },
+      }}
+      /** 按需加载表单所需组件 * */
+      components={DEFAULT_COMPONENTS}
+      pageType="form"
+    />
+  );
+};
+
+export default Topic25;
+
+```
+如上例子，我们给 `EasyPage` 传递了：`editable` 的配置，通过配置名可读出，允许：`age` 字段可编辑，我们看下效果。
+
+
+import Topic25 from '@site/src/demos/topic25';
+
+<Topic25></Topic25>
+
+如上所示，姓名不可编辑了，有时候不可编辑字段比可编辑字段少太多，我们也可以配置：`canNotEditKeys`
+
+```tsx
+import { DEFAULT_COMPONENTS, EasyPage } from '@easy-page/antd-ui';
+import React from 'react';
+import '../common/style';
+import '@easy-page/antd-ui/style.css';
+import { pageInfo } from './pageInfo';
+
+const Topic26 = () => {
+  return (
+    <EasyPage<{ name: string; age: string }>
+      {...pageInfo}
+      context={{
+        editable: {
+          canNotEditKeys: ['age'],
+        },
+      }}
+      /** 按需加载表单所需组件 * */
+      components={DEFAULT_COMPONENTS}
+      pageType="form"
+    />
+  );
+};
+
+export default Topic26;
+```
+
+import Topic26 from '@site/src/demos/topic26';
+
+<Topic26></Topic26>
+
+如上: `age` 字段就不可编辑了，我们还有场景，可能需要禁用所有字段编辑，如：“查看”，此时我们可以：`editable: false`
+
+```tsx
+import { DEFAULT_COMPONENTS, EasyPage } from '@easy-page/antd-ui';
+import React from 'react';
+import '../common/style';
+import '@easy-page/antd-ui/style.css';
+import { pageInfo } from './pageInfo';
+
+const Topic27 = () => {
+  return (
+    <EasyPage<{ name: string; age: string }>
+      {...pageInfo}
+      context={{
+        editable: false,
+      }}
+      /** 按需加载表单所需组件 * */
+      components={DEFAULT_COMPONENTS}
+      pageType="form"
+    />
+  );
+};
+
+export default Topic27;
+
+
+```
+
+import Topic27 from '@site/src/demos/topic27';
+
+<Topic27></Topic27>
+
+如上，所有字段都不可编辑了。
+
+:::tip
+- 更多关于 `EasyPage` 组件 Props 解析，请看: [EasyPage 组件](/docs/apis/components/easy_page) 
+:::

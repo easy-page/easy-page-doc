@@ -1,0 +1,211 @@
+---
+sidebar_position: 5
+---
+
+# 字段联动
+
+在前面的章节中，我们或多或少提到了一些联动，我们这里，就来详细的介绍一下。
+在表单开发中，常见的有如下几种联动场景：
+- 当一个字段变化了，改变另外一个字段组件的 `Props`。
+- 当一个字段变化了，改变另外一个字段的值。
+
+在正常的开发中，我们往往会如下做：
+- 额外存储字段的值或配置，再基于 `useEffect` 进行监听变化，执行相关的副作用。
+
+在使用 `useEffect` 的时候，有两个概念：
+- **依赖项**:如下方第二个参数，表明受谁的变化。
+- **副作用函数**，如下方第一个参数，表明收到变化后需要执行的副作用处理。
+
+```tsx
+useEffect(() => {...}, [name])
+```
+
+但在上述使用过程中，我们会遇到一些繁琐的点：
+- 如果你想监听 `name` 值的变化，那就需要使用：`useState` 额外存储一下 `name` 的值。
+- 对于同一个组件来说，同一个副作用多次触发时，那可能就会遇到：时序问题，因为异步的原因，后触发的副作用可能先执行完毕，导致不符合预期的效果。
+- 上述副作用中，我们即希望其组件挂载时执行，也希望 `name` 变化时执行，则可能需要拆分成 2 个副作用。
+- 如果拆分表单后，想做副作用，可能还涉及到更多的 `Props` 透传，但若不拆分，则会导致整个表单过大。
+
+## 联动组件的值
+当一个字段变化了，改变另外一个字段的值。这种场景我们经常遇到的场景是：
+- 当一个下拉框选择了 A 选项后，另一个下拉框默认选项自动调整默认值。
+
+```tsx
+import { SelectState, UI_COMPONENTS, nodeUtil } from '@easy-page/antd-ui';
+
+export const opt2 = nodeUtil.createField<
+  SelectState<string>,
+  {
+    opt1: SelectState<string>;
+  }
+>(
+  'opt2',
+  '选项字段2',
+  {
+    value: { choosed: '3' },
+    required: true,
+    mode: 'single',
+    actions: [
+      {
+        effectedKeys: ['opt1'],
+        action: ({ effectedData, value }) => {
+          console.log('effectedData:', effectedData);
+          if (effectedData.opt1.choosed === '1') {
+            return { fieldValue: { ...value, choosed: '3' } };
+          } else if (effectedData.opt1.choosed === '2') {
+            return { fieldValue: { ...value, choosed: '4' } };
+          }
+          return {};
+        },
+      },
+    ],
+  },
+  {
+    ui: UI_COMPONENTS.SELECT,
+    select: {
+      options: [
+        { label: '选项3', value: '3' },
+        { label: '选项4', value: '4' },
+      ],
+    },
+  }
+);
+
+
+```
+如上定义的：`actions` 中，我们基于 `opt1` 的值的变化，返回了对应`opt2` 的状态值：`fieldValue: { ...value, choosed: '3' }`，其中 `fieldValue` 即为要改变的值，如果什么都不返回，则不会有任何变化，如果返回了：`fieldValue`，则会更新`opt2` 的值。
+
+我们看看效果：
+
+import Topic22 from '@site/src/demos/topic22';
+
+<Topic22></Topic22>
+
+## 联动组件的 Props
+在 `EasyPage` 中，我们完美的解决了上述痛点，下面将介绍一下 `EasyPage` 里的副作用是如何实现来解决上述问题的。首先基于上述分析，我们理解到副作用的两个
+核心内容：
+- **依赖项**
+- **副作用函数**
+
+我们以之前的一个例子来看看咱们该如何定义：
+- 年龄字段的 `placeholder` 随着 `name` 字段的值变化而变化
+
+```tsx
+import { Empty, InputEffectedType, nodeUtil } from '@easy-page/antd-ui';
+
+export const age = nodeUtil.createField<
+  string,
+  { name: string },
+  Empty,
+  InputEffectedType
+>('age', '年龄', {
+  value: '',
+  required: true,
+  /** 字段副作用 */
+  actions: [
+    {
+      effectedKeys: ['name'],
+      /** 加载时，立即执行 */
+      initRun: true,
+      action: ({ effectedData, value, initRun }) => {
+        return {
+          effectResult: {
+            inputProps: {
+              placeholder: `${effectedData.name || '-'} 的年龄`,
+            },
+          },
+        };
+      },
+    },
+  ],
+});
+
+```
+在上述定义中，我们的 `actions` 是一个数组，表明可能有多个副作用，每个副作用都有一个：`effectedKeys` 配置，即依赖项配置。
+其类型定义在：`nodeUtil.createField<string, {name: string}>` 第二个范型上。和 `effectedKeys` 同级有一个 `initRun` 配置，
+表明是否在组件挂载的时候执行此副作用；和 `effectedKeys` 同级有一个 `action` 函数，表明要执行的副作用，其中，比较常用的几个参数含义：
+- `effectedData` 表示受影响的值，其类型就是上述所说的第二个范型。
+- `value` 表明是当前字段最新的值
+- `initRun` 表明是否是组件挂载时执行
+
+我们返回了: `effectResult`，其中包含了输入框的 Props: `placeholder` 的变化，那原理是啥呢？
+- 其实除了：`fieldValue` 外我们可能改变组件的任意东西，因此，就出了字段值以外的变化，我们都可以返回：`effectResult`
+- `effectResult` 到底会影响什么，类型是什么，取决于基础组件的定义，如上述定义中：`nodeUtil.createField` 里的第四个范型：`InputEffectedType`,
+  即框架默认的输入框组件所能解析的 `副作用值`
+
+我们可以提前看一下，`Input` 组件里的处理逻辑：
+
+```tsx
+  <AntdInput
+        {...baseProps}
+        {...(effectedResult?.inputProps || {})}
+        onBlur={(e) => {
+          onChange({ target: { value: fieldValue } });
+          onBlur?.(e);
+        }}
+        onChange={(val) => {
+          setFieldValue(val.target.value);
+        }}
+        value={fieldValue}
+      />
+```
+由上可见，组件定义的：`effectResult` 类型，接收到对应 Props 后就会传递给组件，即可实现上述联动。
+
+> 在[扩展基础组件](/docs/tutorial-extras/extends_components) 章节里，会重点讲解：`effectResult` 的使用。
+
+我们演示下效果：
+
+import Topic20 from '@site/src/demos/topic20';
+
+<Topic20></Topic20>
+
+## 副作用触发时序问题
+
+在 [基础-搜索下拉框](/docs/tutorial-basics/create-select) 的例子中，有这么一段副作用：
+
+```tsx
+actions: [
+    {
+      effectedKeys: ['goods'],
+      /** 初始化执行 */
+      initRun: true,
+      /** 初始化查询选中数据 */
+      action: async ({ value, initRun }) => {
+        /** 只有初始化时，或者存在关键词时才做查询 **/
+        if (initRun || value.keyword !== undefined) {
+          /** 查询选项 */
+          const options = (await searchByKeywords(value.keyword)) || [];
+          const hasChoosed = options.find((x) => x.value === value.choosed);
+          if (value.choosed && !hasChoosed) {
+            /** 选择的选项不在查询的列表中，单独搜索选中选项 */
+            const choosed = await searchById(value.choosed);
+            return {
+              fieldValue: {
+                ...value,
+                options: [choosed, ...options],
+                keyword: undefined,
+              },
+            };
+          }
+          return { fieldValue: { ...value, options, keyword: undefined } };
+        }
+        return {};
+      },
+    },
+  ]
+```
+按照上述定义，我们解读一下这个副作用：
+- 当初始化加载的时候，执行选项查询逻辑
+- 当存在关键词的时候，执行选项查询逻辑
+
+那这样就会遇到一个问题：如果初始化加载时，查询网络较慢，要：3s 钟，而在这个 3s 内立马输入搜索关键词，假设搜索关键词后正好网络较好，1s 中返回了。
+此时，搜索的结果先回来，更新了选项；初始化加载的选项后回来更新了选项，此时的选项就会是：初始化加载的选项，导致不符合预期。
+
+上述讲解的是同一个副作用被多次触发，其实多个副作用先后被触发也会遇到这个问题，在 `EasyPage` 中，针对上述场景，我们封装了 `Promise` 的执行，如果之前存在副作用执行中，现在新来了一个副作用，则前者副作用会被抛弃。
+
+## 小结
+在上述的介绍中：
+- 我们通过 `action` 中的 `effectedData` 解决了副作用状态额外存储和传递的问题。
+- 我们通过副作用时序控制，解决了时序问题。
+- 我们通过 `initRun`，解决了需要多次定义副作用的问题。
+- 上述设计整体上符合：“高内聚、低耦合”，从而不需要和外界耦合和 `Props` 透传。
