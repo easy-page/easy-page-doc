@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://easy-page-doc.github.io/blog</id>
+    <title>Easy Page Blog</title>
+    <updated>2021-08-26T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://easy-page-doc.github.io/blog"/>
+    <subtitle>Easy Page Blog</subtitle>
+    <icon>https://easy-page-doc.github.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[欢迎]]></title>
+        <id>https://easy-page-doc.github.io/blog/欢迎</id>
+        <link href="https://easy-page-doc.github.io/blog/欢迎"/>
+        <updated>2021-08-26T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[欢迎大家使用 EasyPage]]></summary>
+        <content type="html"><![CDATA[<p>欢迎大家使用 <code>EasyPage</code></p>]]></content>
+        <author>
+            <name>皮锟</name>
+            <uri>https://github.com/easy-page/easy-page</uri>
+        </author>
+    </entry>
+</feed>

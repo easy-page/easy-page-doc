@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkeasy_page_doc=self.webpackChunkeasy_page_doc||[]).push([[4079],{4949:e=>{e.exports=JSON.parse('{"categoryGeneratedIndex":{"title":"\u7ec4\u4ef6","slug":"/category/\u7ec4\u4ef6","permalink":"/docs/category/\u7ec4\u4ef6","sidebar":"apis","navigation":{"next":{"title":"EasyPage","permalink":"/docs/apis/components/easy_page"}}}}')}}]);
