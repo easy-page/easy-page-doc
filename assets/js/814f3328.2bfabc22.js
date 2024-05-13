@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkeasy_page_doc=self.webpackChunkeasy_page_doc||[]).push([[7472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"\u6b22\u8fce","permalink":"/easy-page-doc/blog/\u6b22\u8fce","unlisted":false}]}')}}]);

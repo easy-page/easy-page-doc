@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
         <title>Easy Page Blog</title>
-        <link>https://easy-page-doc.github.io/blog</link>
+        <link>https://easy-page-doc.github.io/easy-page-doc/blog</link>
         <description>Easy Page Blog</description>
         <lastBuildDate>Thu, 26 Aug 2021 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
@@ -10,8 +10,8 @@
         <language>en</language>
         <item>
             <title><![CDATA[欢迎]]></title>
-            <link>https://easy-page-doc.github.io/blog/欢迎</link>
-            <guid>https://easy-page-doc.github.io/blog/欢迎</guid>
+            <link>https://easy-page-doc.github.io/easy-page-doc/blog/欢迎</link>
+            <guid>https://easy-page-doc.github.io/easy-page-doc/blog/欢迎</guid>
             <pubDate>Thu, 26 Aug 2021 00:00:00 GMT</pubDate>
             <description><![CDATA[欢迎大家使用 EasyPage]]></description>
             <content:encoded><![CDATA[<p>欢迎大家使用 <code>EasyPage</code></p>]]></content:encoded>
